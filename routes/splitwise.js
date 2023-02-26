@@ -66,11 +66,11 @@ router.get("/callback", async (req, res) => {
             consumerSecret: process.env.SPLITWISE_CONSUMER_SECRET,
             accessToken: access_token 
         });
-        sw.getCurrentUser().then( (swRes) => {
+        sw.getCurrentUser().then( async (swRes) => {
             s_id = swRes.id;
             s_email = swRes.email;
             let sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES (?, ?, "${s_email}", ${s_id}, ?);`;
-            let response = connectToDB(sql, [...user_info, access_token]);
+            let response = await connectToDB(sql, [...user_info, access_token]);
             res.send(response);
         });
         
