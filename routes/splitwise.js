@@ -138,4 +138,30 @@ router.post('/add_group_expense?user_id=:user_id&group_id=:group_id&cost=:cost&d
 
 });
 
+router.get('/group_expenses', async (req, res) => {
+    const group_id = req.query.group_id;
+    const user_id = req.query.user_id;
+
+    let sql = `SELECT useraccesstoken FROM Users WHERE user_id = ${user_id};`;
+    let response = await connectToDB(sql)
+    let useraccesstoken = response.message.useraccesstoken;
+
+    const sw = Splitwise({
+        consumerKey: process.env.SPLITWISE_CONSUMER_KEY,
+        consumerSecret: process.env.SPLITWISE_CONSUMER_SECRET,
+        accessToken: useraccesstoken
+    });
+
+    sw.getExpenses({
+        group_id: group_id
+    }).then ((swRes) => {
+        let response = [];
+        for (let i = 0; i < swRes.length; i++) {
+            let obj = swRes[i];
+            response.push({cost: obj.cost, description: obj.description});
+        }
+        res.send({expenses: response});
+    });
+});
+
 module.exports = router;
