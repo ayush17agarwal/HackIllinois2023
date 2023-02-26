@@ -12,7 +12,7 @@ app.use(
 //Routes
 const groupRoutes = require('./routes/groups');
 const choreRoutes = require('./routes/chores');
-const splitwiseRoutes = require('./routes/server_splitwise');
+const splitwiseRoutes = require('./routes/splitwise');
 
 //Use routes
 app.use('/group', groupRoutes);
