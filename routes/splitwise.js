@@ -53,7 +53,7 @@ router.post('/create_group?user_id=:user_id&group_name=:group_name', (req, res) 
 router.get("/login", (req, res) => {
     const user_info = `${req.query.user_id}|${req.query.first_name}|${req.query.last_name}|${req.query.email}`;
     const encoded = Buffer.from(user_info, 'utf-8').toString('base64');
-    res.redirect(SPLITWISE_AUTHORIZE_URL + '?response_type=code&client_id=' + process.env.client_id + '&redirect_uri=' + REDIRECT_URI + '&state=' + encoded);
+    res.redirect(SPLITWISE_AUTHORIZE_URL + '?response_type=code&client_id=' + process.env.SPLITWISE_CONSUMER_KEY + '&redirect_uri=' + REDIRECT_URI + '&state=' + encoded);
 });
 
 router.get("/callback", async (req, res) => {
@@ -63,8 +63,8 @@ router.get("/callback", async (req, res) => {
     try {
         const { data: { access_token } } = await axios.post(SPLITWISE_TOKEN_URL, {
             grant_type: 'authorization_code',
-            client_id: process.env.client_id,
-            client_secret: process.env.client_secret,
+            client_id: process.env.SPLITWISE_CONSUMER_KEY,
+            client_secret: process.env.SPLITWISE_CONSUMER_SECRET,
             redirect_uri: REDIRECT_URI,
             code: code
         }, {
