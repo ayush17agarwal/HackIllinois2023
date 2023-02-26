@@ -9,15 +9,14 @@ const SPLITWISE_AUTHORIZE_URL = 'https://secure.splitwise.com/oauth/authorize';
 const SPLITWISE_TOKEN_URL = 'https://secure.splitwise.com/oauth/token';
 const REDIRECT_URI = encodeURI(process.env.redirect_uri + '/splitwise/callback');
 
-router.post('/create_group?user_id=:user_id&group_name=:group_name', (req, res) => {
+router.post('/create_group?user_id=:user_id&group_name=:group_name', async (req, res) => {
     // params group_name, user_id
     // res group_id
     user_id = req.params.user_id;
     group_name = req.params.group_name;
 
-    // let sql = 'INSERT INTO Rooms';
     let sql = `SELECT email, useraccesstoken FROM Users WHERE user_id = ${user_id};`;
-    let response = connectToDB(sql)
+    let response = await connectToDB(sql, [])
     email = response.message.email;
     useraccesstoken = response.message.useraccesstoken;
 
@@ -29,10 +28,10 @@ router.post('/create_group?user_id=:user_id&group_name=:group_name', (req, res) 
 
     sw.createGroup({
         name: group_name
-    }).then((swRes) => {
+    }).then(async (swRes) => {
         group_id = swRes.group.id;
-        let sql = `INSERT INTO Rooms VALUES (${group_id}, ${group_name}); INSERT INTO Group_users VALUES (${group_id}, ${user_id});`;
-        let response = connectToDB(sql);
+        let sql = `INSERT INTO Rooms VALUES (${group_id}, "${group_name}"); INSERT INTO Group_users VALUES (${group_id}, ${user_id});`;
+        let response = await connectToDB(sql, []);
         res.send({
             group_id: group_id
         });
@@ -82,12 +81,12 @@ router.get("/callback", async (req, res) => {
     res.status(200);
 });
 
-router.post('/join_group?group_id=:group_id&user_id=:user_id', (req, res) => {
+router.post('/join_group?group_id=:group_id&user_id=:user_id', async (req, res) => {
     group_id = req.params.group_id;
     user_id = req.params.user_id;
 
     let sql = `SELECT useraccesstoken FROM Users WHERE user_id = ${user_id};`;
-    let response = connectToDB(sql)
+    let response = await connectToDB(sql)
     useraccesstoken = response.message.useraccesstoken;
 
     const sw = Splitwise({
@@ -99,10 +98,10 @@ router.post('/join_group?group_id=:group_id&user_id=:user_id', (req, res) => {
     sw.addUserToGroup({
         group_id: group_id,
         user_id: user_id
-    }).then( (swRes) => {
+    }).then(async (swRes) => {
     
         let sql = `INSERT INTO Group_users VALUES (${group_id}, ${user_id});`;
-        let response = connectToDB(sql);
+        let response = await connectToDB(sql);
         res.send({
             group_id: group_id
         });
@@ -113,13 +112,13 @@ router.post('/join_group?group_id=:group_id&user_id=:user_id', (req, res) => {
     
 });
 
-router.post('/add_group_expense?user_id=:user_id&group_id=:group_id&cost=:cost&description=:description', (req, res) => {
+router.post('/add_group_expense?user_id=:user_id&group_id=:group_id&cost=:cost&description=:description', async (req, res) => {
     group_id = req.params.group_id;
     cost = req.params.cost;
     description = req.params.description;
 
     let sql = `SELECT useraccesstoken FROM Users WHERE user_id = ${user_id};`;
-    let response = connectToDB(sql)
+    let response = await connectToDB(sql)
     useraccesstoken = response.message.useraccesstoken;
 
     const sw = Splitwise({
