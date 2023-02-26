@@ -12,6 +12,13 @@ router.get('/all_inventory?group_id=:group_id', (req, res) => {
     res.send(response);
 });
 
+router.get('/all_inventory_categories?group_id=:group_id', (req, res) => {
+    let group_id = req.params.group_id;
+    let sql = `SELECT DISTINCT category_name FROM Inventory_categories WHERE group_id = ${group_id};`;
+    let response = connectToDB(sql);
+    res.send(response);
+});
+
 router.post('/add_inventory?inventory_name=:inventory_name&group_id=:group_id&category_name=:category_name', (req, res) => {
     let group_id = req.params.group_id;
     let inventory_name = req.params.inventory_name;
@@ -34,7 +41,27 @@ router.post('/add_inventory?inventory_name=:inventory_name&group_id=:group_id&ca
 
 })
 
-router.put('/update_inventory?inventory_id=:inventory_id&running_low=:running_low', (req, res) => {
+router.post('/add_category?group_id=:group_id&category_name=:category_name', (req, res) => {
+    let group_id = req.params.group_id;
+    let category_name = req.params.category_name;
+    
+    let sql = `INSERT INTO Inventory_categories (group_id, category_name) VALUES(${group_id}, "${category_name}");`;
+    let response = connectToDB(sql);
+    res.send(response);
+});
+
+router.put('/update_inventory?inventory_id=:inventory_id&inventory_name=:inventory_name&ic_id=:ic_id&group_id=:group_id', (req, res) => {
+    let inventory_id = req.params.inventory_id;
+    let inventory_name = req.params.inventory_name;
+    let ic_id = req.params.ic_id;
+    let group_id = req.params.group_id;
+
+    let sql = `UPDATE TABLE Inventory SET inventory_name = ${inventory_name}, id_ic = ${id_ic} WHERE inventory_id = ${inventory_id};`;
+    let response = connectToDB(sql);
+    res.send(response);
+});
+
+router.put('/update_lowinventory?inventory_id=:inventory_id&running_low=:running_low', (req, res) => {
     let inventory_id = req.params.inventory_id;
     let running_low = req.params.running_low;
 
