@@ -51,7 +51,7 @@ router.post('/create_group?user_id=:user_id&group_name=:group_name', (req, res) 
 });
 
 router.get("/login", (req, res) => {
-    const user_info = `${req.query.user_id}|${req.query.first_name}|${req.query.last_name}|${req.query.email}`;
+    const user_info = `${req.query.first_name}|${req.query.last_name}`;
     const encoded = Buffer.from(user_info, 'utf-8').toString('base64');
     res.redirect(SPLITWISE_AUTHORIZE_URL + '?response_type=code&client_id=' + process.env.SPLITWISE_CONSUMER_KEY + '&redirect_uri=' + REDIRECT_URI + '&state=' + encoded);
 });
@@ -81,7 +81,7 @@ router.get("/callback", async (req, res) => {
             s_id = swRes.id;
             s_email = swRes.email;
             let sql = `INSERT INTO Users VALUES (?, ?, "${s_email}", ${s_id}, ${useraccesstoken});`;
-            let response = connectToDB(sql, [...user_info, access_token]);
+            let response = connectToDB(sql, user_info);
             res.send(response);
         });
         
