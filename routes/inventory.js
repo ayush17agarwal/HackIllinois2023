@@ -34,7 +34,7 @@ router.post('/add_inventory?inventory_name=:inventory_name&group_id=:group_id&ca
 
 })
 
-router.update('/update_inventory?inventory_id=:inventory_id&running_low=:running_low', (req, res) => {
+router.put('/update_inventory?inventory_id=:inventory_id&running_low=:running_low', (req, res) => {
     let inventory_id = req.params.inventory_id;
     let running_low = req.params.running_low;
 
