@@ -14,6 +14,7 @@ async function connectToDB(sql, subs) {
     });
 
     try {
+        console.log("connecting...");
         const [rows, fields]= await con.execute(sql, subs);
         res = {status: '200 OK', message: rows};
     } catch (err) {

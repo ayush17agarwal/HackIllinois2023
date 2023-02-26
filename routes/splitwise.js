@@ -49,6 +49,7 @@ router.post('/create_group', async (req, res) => {
 
 //DONE
 router.get("/login", (req, res) => {
+    console.log("start");
     const user_info = `${req.query.first_name}|${req.query.last_name}`;
     const encoded = Buffer.from(user_info, 'utf-8').toString('base64');
     res.redirect(SPLITWISE_AUTHORIZE_URL + '?response_type=code&client_id=' + process.env.SPLITWISE_CONSUMER_KEY + '&redirect_uri=' + REDIRECT_URI + '&state=' + encoded);
@@ -77,12 +78,24 @@ router.get("/callback", async (req, res) => {
             accessToken: access_token 
         });
         sw.getCurrentUser().then( async (swRes) => {
-            s_id = swRes.id;
-            s_email = swRes.email;
-            s_first = swRes.first_name;
-            s_last = swRes.last_name
-            let sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, ?);`;
-            let response = await connectToDB(sql, [access_token]);
+            console.log(swRes);
+            let s_id = swRes.id;
+            let s_email = swRes.email;
+            let s_first = swRes.first_name;
+            let s_last = swRes.last_name;
+            let sql = `SELECT COUNT(${s_id}) as count FROM Users WHERE splitwise_id = ${s_id};`
+            response = await connectToDB(sql);
+            let count = response.message[0].count;
+            console.log(count);
+            if (count == 0) {
+                sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, ${access_token});`;
+            } else {
+                sql = `UPDATE Users SET useraccesstoken = ${access_token} WHERE splitwise_id = ${s_id}`;
+            }
+            
+            //sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, ?);`;
+            response = await connectToDB(sql);
+            console.log(response);
             res.send(response);
         });
         
@@ -90,6 +103,7 @@ router.get("/callback", async (req, res) => {
         console.log(err);
         res.status(400).json(err);
     }
+
     res.status(200);
 });
 
