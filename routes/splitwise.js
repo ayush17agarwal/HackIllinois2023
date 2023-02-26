@@ -88,9 +88,9 @@ router.get("/callback", async (req, res) => {
             let count = response.message[0].count;
             console.log(count);
             if (count == 0) {
-                sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, ${access_token});`;
+                sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, "${access_token}");`;
             } else {
-                sql = `UPDATE Users SET useraccesstoken = ${access_token} WHERE splitwise_id = ${s_id}`;
+                sql = `UPDATE Users SET useraccesstoken = "${access_token}" WHERE splitwise_id = ${s_id}`;
             }
             
             //sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, ?);`;
