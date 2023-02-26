@@ -80,8 +80,8 @@ router.get("/callback", async (req, res) => {
         sw.getCurrentUser().then( (swRes) => {
             s_id = swRes.id;
             s_email = swRes.email;
-            let sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES (?, ?, "${s_email}", ${s_id}, ${access_token});`;
-            let response = connectToDB(sql, user_info);
+            let sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES (?, ?, "${s_email}", ${s_id}, ?);`;
+            let response = connectToDB(sql, [...user_info, access_token]);
             res.send(response);
         });
         
