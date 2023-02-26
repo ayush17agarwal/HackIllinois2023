@@ -95,7 +95,10 @@ router.get("/callback", async (req, res) => {
             
             //sql = `INSERT INTO Users (firstname, lastname, email, splitwise_id, useraccesstoken) VALUES ("${s_first}", "${s_last}", "${s_email}", ${s_id}, ?);`;
             response = await connectToDB(sql);
-            console.log(response);
+            //console.log(response);
+
+            sql = `SELECT user_id FROM Users WHERE splitwise_id = ${s_id}`;
+            response = await connectToDB(sql);
             res.send(response);
         });
         
@@ -110,12 +113,17 @@ router.get("/callback", async (req, res) => {
 
 router.post('/join_group', async (req, res) => {
     group_id = req.body.group_id;
-    user_id = req.body.user_id;
+    user_0_id = req.body.user_0_id;
+    adding_user_id = req.body.adding_user_id;
 
-    let sql = `SELECT useraccesstoken, splitwise_id FROM Users WHERE user_id = ${user_id};`;
+    let sql = `SELECT useraccesstoken FROM Users WHERE user_id = ${user_0_id};`;
     let response = await connectToDB(sql)
+    //console.log(response);
     useraccesstoken = response.message[0].useraccesstoken;
-    splitwise_id = response.message[0].splitwise_id;
+
+    sql = `SELECT splitwise_id FROM Users WHERE user_id = ${adding_user_id}`;
+    response = await connectToDB(sql);
+    invitee_splitwise_id = response.message[0].splitwise_id;
 
     const sw = Splitwise({
         consumerKey: process.env.SPLITWISE_CONSUMER_KEY,
@@ -125,10 +133,10 @@ router.post('/join_group', async (req, res) => {
 
     sw.addUserToGroup({
         group_id: group_id,
-        user_id: splitwise_id
+        user_id: invitee_splitwise_id
     }).then(async (swRes) => {
     
-        let sql = `INSERT INTO Group_users VALUES (${group_id}, ${user_id});`;
+        let sql = `INSERT INTO Group_users VALUES (${group_id}, ${adding_user_id});`;
         let response = await connectToDB(sql);
         res.send({
             group_id: group_id
@@ -136,30 +144,50 @@ router.post('/join_group', async (req, res) => {
     });    
 });
 
-router.post('/add_group_expense?user_id=:user_id&group_id=:group_id&cost=:cost&description=:description', async (req, res) => {
-    group_id = req.params.group_id;
-    cost = req.params.cost;
-    description = req.params.description;
+router.post('/add_group_expense', async (req, res) => {
+    group_id = req.body.group_id;
+    cost = req.body.cost;
+    description = req.body.description;
+    user_id = req.body.user_id;
 
     let sql = `SELECT useraccesstoken FROM Users WHERE user_id = ${user_id};`;
     let response = await connectToDB(sql)
-    useraccesstoken = response.message.useraccesstoken;
+    useraccesstoken = response.message[0].useraccesstoken;
+    // sql = `SELECT group_name FROM Rooms WHERE group_id = ${group_id};`;
+    // response = await connectToDB(sql);
+    // group_name = response.message[0].group_name;
 
+    sql = `SELECT splitwise_id as user_id FROM Group_users NATURAL JOIN Users WHERE group_id = ${group_id}`;
+    response = await connectToDB(sql);
+    console.log(response);
     const sw = Splitwise({
         consumerKey: process.env.SPLITWISE_CONSUMER_KEY,
         consumerSecret: process.env.SPLITWISE_CONSUMER_SECRET,
         accessToken: useraccesstoken
     });
 
-    sw.createExpense({
-        group_id: group_id,
-        cost: cost,
-        description: description,
+    const { data } = await axios.post('https://secure.splitwise.com/api/v3.0/create_expense', {
+        cost,
+        description,
+        group_id,
         split_equally: true
-    }).then( (swRes) => {
-        res.send(swRes);
+    }, {
+        headers: {
+            Authorization: `Bearer ${useraccesstoken}`
+        }
     });
-
+    
+    console.log(data);
+    res.json(data);
+    // sw.createExpense({
+    //     group_id: group_id,
+    //     cost: cost,
+    //     description: description,
+    //     users: [{user_id: '39590589'}]
+    // }).then( (swRes) => {
+    //     res.send(swRes);
+    // });
+    
 });
 
 router.get('/group_expenses', async (req, res) => {
