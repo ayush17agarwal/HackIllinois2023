@@ -16,7 +16,7 @@ const splitwiseRoutes = require('./routes/splitwise');
 
 //Use routes
 app.use('/group', groupRoutes);
-app.use('chore', choreRoutes);
+app.use('/chore', choreRoutes);
 app.use('/splitwise', splitwiseRoutes);
 
 app.get("/", (req, res) => {

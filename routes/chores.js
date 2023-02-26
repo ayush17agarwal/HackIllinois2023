@@ -1,5 +1,5 @@
 require('dotenv').config();
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 const express = require('express');
 const router = express.Router();
@@ -18,22 +18,27 @@ router.post('/add_chore', (req, res) => {
     let assignee_id = req.body.assignee_id;
     let due_date = req.body.due_date;
 
-    let sql = `INSERT INTO Chores (chore_name, recurring_value, chore_description, date_added, group_id, assignee_id, due_date) VALUES (${chore_name}, ${recurring_value}, ${chore_description}, ${date_added}, ${group_id}, ${assignee_id}, ${due_date});`;
+    let sql = `INSERT INTO Chores (chore_name, recurring_value, chore_description, date_added, group_id, assignee_id, due_date, completed) VALUES (${chore_name}, ${recurring_value}, ${chore_description}, ${date_added}, ${group_id}, ${assignee_id}, ${due_date}, "FALSE");`;
 
+    console.log(sql);
     let response = connectToDB(sql);
 
     res.send(response);
 });
 
 
-router.get('/all_chores?group_id=:group_id', (req, res) => {
+router.get('/all_chores', async (req, res) => {
     let group_id = req.query.group_id;
 
-    let sql = `SELECT * FROM Chores where group_id = ${group_id}`;
+    let sql = `SELECT * FROM Chores WHERE group_id=${group_id};`;
+    console.log(sql);
 
-    let response = connectToDB(sql);
+    const response = await connectToDB(sql, []);
+    // console.log(response);
 
-    res.send(response);
+    // res.send(response);
+
+    res.status(200).json({});
 });
 
 router.post('/completed_chore', (req, res) => {
