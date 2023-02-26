@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const utils = require('./utils');
+const {connectToDB} = require('./utils');
 
-router.get('/my_groups', (req, res) => {
+router.get('/my_groups', async (req, res) => {
 
-    let sql = `SELECT * FROM Rooms WHERE group_id IN (SELECT group_id FROM Group_users WHERE user_id = ${req.query.user_id});`;
+    const user_id = req.query.user_id;
 
-    let response = utils.connectToDB(sql);
+    let sql = `SELECT * FROM Rooms WHERE group_id IN (SELECT group_id FROM Group_users WHERE user_id = ${user_id});`;
 
-    console.log(response);
+    let response = await connectToDB(sql);
+
     res.send(response);
 });
 
