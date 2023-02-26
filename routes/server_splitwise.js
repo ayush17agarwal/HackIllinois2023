@@ -72,12 +72,24 @@ router.get("/callback", async (req, res) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
             }
         });
-        let sql = `INSERT INTO Users VALUES (?, ?, ?, ?, 000, ?);`;
-        let response = connectToDB(sql, [...user_info, access_token]);
+        const sw = Splitwise({
+            consumerKey: process.env.SPLITWISE_CONSUMER_KEY,
+            consumerSecret: process.env.SPLITWISE_CONSUMER_SECRET,
+            accessToken: access_token 
+        });
+        sw.getCurrentUser().then( (swRes) => {
+            s_id = swRes.id;
+            s_email = swRes.email;
+            let sql = `INSERT INTO Users VALUES (?, ?, "${s_email}", ${s_id}, ${useraccesstoken});`;
+            let response = connectToDB(sql, [...user_info, access_token]);
+            res.send(response);
+        });
+        
     } catch (err) {
         console.log(err);
         res.status(400).json(err);
     }
+    res.status(200);
 });
 
 router.post('/join_group?group_id=:group_id&user_id=:user_id', (req, res) => {
