@@ -9,7 +9,7 @@ const SPLITWISE_AUTHORIZE_URL = 'https://secure.splitwise.com/oauth/authorize';
 const SPLITWISE_TOKEN_URL = 'https://secure.splitwise.com/oauth/token';
 const REDIRECT_URI = encodeURI(process.env.redirect_uri + '/splitwise/callback');
 
-
+//TODO: NECESSARY?
 router.get('/my_groups?user_id=:user_id', (req, res) => {
 
     let sql = 'SELECT * FROM Rooms';

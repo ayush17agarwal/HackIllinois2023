@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const utils = require('./utils');
 
-router.get('/groups', (req, res) => {
+router.get('/my_groups', (req, res) => {
 
     let sql = `SELECT * FROM Rooms WHERE group_id IN (SELECT group_id FROM Group_users WHERE user_id = ${req.query.user_id});`;
 
