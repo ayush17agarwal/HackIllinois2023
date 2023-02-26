@@ -13,11 +13,13 @@ app.use(
 const groupRoutes = require('./routes/groups');
 const choreRoutes = require('./routes/chores');
 const splitwiseRoutes = require('./routes/splitwise');
+const inventoryRoutes = require('./routes/inventory');
 
 //Use routes
 app.use('/group', groupRoutes);
 app.use('/chore', choreRoutes);
 app.use('/splitwise', splitwiseRoutes);
+app.use('/inventory', inventoryRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "Server running!" });
